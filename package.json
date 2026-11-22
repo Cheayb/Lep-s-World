@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "لعبة عالم ليب",
   "scripts": {
-    "build": "mkdir -p www && cp index.html www/index.html"
+    "build": "mkdir -p www assets && cp index.html www/index.html && node make-icon.mjs && cp icon.png assets/icon.png"
   },
   "dependencies": {
     "@capacitor/android": "^6.0.0",
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.0.0",
-    "@capacitor/core": "^6.0.0"
+    "@capacitor/core": "^6.0.0",
+    "@resvg/resvg-js": "^2.6.2"
   }
 }
