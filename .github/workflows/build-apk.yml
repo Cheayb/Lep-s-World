@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -28,11 +28,48 @@ jobs:
         run: |
           npm install
           npm run build
+          node -e '
+            import("fs").then(async ({ default: fs }) => {
+              const { Resvg } = await import("@resvg/resvg-js");
+              const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+                <defs>
+                  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#16a34a"/>
+                    <stop offset="100%" stop-color="#065f46"/>
+                  </linearGradient>
+                  <radialGradient id="glow" cx="50%" cy="45%" r="55%">
+                    <stop offset="0%" stop-color="#fde047" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#065f46" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+                <rect width="1024" height="1024" rx="220" fill="url(#glow)"/>
+                <circle cx="770" cy="240" r="105" fill="#facc15" stroke="#fef08a" stroke-width="12"/>
+                <circle cx="770" cy="240" r="72" fill="none" stroke="#ca8a04" stroke-width="8"/>
+                <rect x="756" y="195" width="28" height="90" rx="8" fill="#ca8a04"/>
+                <path d="M270 430 Q512 370 754 430 L700 220 Q512 170 324 220 Z" fill="#22c55e" stroke="#14532d" stroke-width="14" stroke-linejoin="round"/>
+                <rect x="230" y="410" width="564" height="44" rx="22" fill="#15803d" stroke="#14532d" stroke-width="12"/>
+                <rect x="305" y="345" width="414" height="72" rx="10" fill="#111827"/>
+                <rect x="457" y="340" width="110" height="82" rx="14" fill="none" stroke="#facc15" stroke-width="18"/>
+                <circle cx="512" cy="590" r="150" fill="#fde68a" stroke="#d97706" stroke-width="10"/>
+                <circle cx="458" cy="575" r="16" fill="#1e293b"/>
+                <circle cx="566" cy="575" r="16" fill="#1e293b"/>
+                <path d="M450 645 Q512 695 574 645" fill="none" stroke="#92400e" stroke-width="12" stroke-linecap="round"/>
+                <path d="M352 600 Q340 810 512 835 Q684 810 672 600 Q625 715 512 720 Q399 715 352 600 Z" fill="#f97316" stroke="#c2410c" stroke-width="10"/>
+              </svg>`;
+              const png = new Resvg(svg, { fitTo: { mode: "width", value: 1024 } }).render().asPng();
+              fs.writeFileSync("icon.png", png);
+              fs.copyFileSync("icon.png", "assets/icon.png");
+              console.log("Generated icon.png and assets/icon.png");
+            });
+          '
 
       - name: Initialize Capacitor and Add Android
         run: |
-          npx cap init "عالم ليب" "com.lepsworld.arabic" --web-dir www
+          npx cap init "Lep's World" "com.cheayb.lepsworld" --web-dir=www
           npx cap add android
+          npx capacitor-assets generate --android
+          npx cap copy android
 
       - name: Build Debug APK
         run: |
